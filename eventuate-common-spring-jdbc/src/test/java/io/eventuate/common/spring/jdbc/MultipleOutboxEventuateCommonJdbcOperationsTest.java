@@ -16,12 +16,13 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.testcontainers.images.builder.ImageFromDockerfile;
 
 import java.nio.file.FileSystems;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
+import static org.junit.Assert.assertNotNull;
 
 @SpringBootTest(classes = MultipleOutboxEventuateCommonJdbcOperationsTest.Config.class)
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -64,8 +65,12 @@ public class MultipleOutboxEventuateCommonJdbcOperationsTest {
         String payload = "{}";
         String destination = "myChannel";
         Map<String, String> headers = new HashMap<>();
-        headers.put("ID", UUID.randomUUID().toString());
         headers.put("PARTITION_ID", UUID.randomUUID().toString());
-        eventuateCommonJdbcOperations.insertIntoMessageTable(idGenerator, payload, destination, headers, eventuateSchema);
+
+        String messageId = eventuateCommonJdbcOperations.insertIntoMessageTable(idGenerator, payload, destination, headers, eventuateSchema);
+
+        assertNotNull(messageId);
+
+        //assertMessageInsertedIntoShardedOutbox(messageId);
     }
 }
