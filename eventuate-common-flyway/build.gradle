@@ -7,7 +7,7 @@ dependencies {
     runtimeOnly "org.flywaydb:flyway-sqlserver:$flywayVersion"
     runtimeOnly "org.flywaydb:flyway-database-postgresql:$flywayVersion"
 
-    testImplementation project(":eventuate-common-testcontainers")
+    testImplementation project(":eventuate-common-database-testcontainers")
 
     testImplementation "org.springframework.boot:spring-boot-starter-flyway-test:$springBootVersion"
     testImplementation "org.springframework.boot:spring-boot-starter-jdbc-test:$springBootVersion"

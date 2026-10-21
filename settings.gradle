@@ -10,7 +10,7 @@ include 'eventuate-common-in-memory-database'
 include 'eventuate-common-common-spring-in-memory-database'
 include 'eventuate-common-spring-in-memory-database'
 // include 'eventuate-common-micronaut-in-memory-database'
-include 'eventuate-common-testcontainers'
+include 'eventuate-common-database-testcontainers'
 include 'eventuate-common-flyway'
 include 'eventuate-common-database-bom'
 

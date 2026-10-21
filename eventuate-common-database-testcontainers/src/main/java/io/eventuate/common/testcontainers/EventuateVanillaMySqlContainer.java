@@ -7,7 +7,7 @@ import java.nio.file.Path;
 public class EventuateVanillaMySqlContainer extends AbstractEventuateMySqlContainer<EventuateVanillaMySqlContainer> {
 
     public EventuateVanillaMySqlContainer() {
-        super(ContainerUtil.findImage("eventuateio/eventuate-vanilla-mysql8", "eventuate.common.version.properties"));
+        super(ContainerUtil.findImage("eventuateio/eventuate-vanilla-mysql8", "eventuate.common.database.version.properties"));
         withConfiguration();
     }
 

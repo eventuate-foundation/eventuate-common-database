@@ -11,7 +11,7 @@ dependencies {
     testImplementation "org.springframework.boot:spring-boot-starter-data-r2dbc-test:$springBootVersion"
     testImplementation "org.springframework.boot:spring-boot-starter-jdbc-test:$springBootVersion"
 
-    testImplementation project(":eventuate-common-testcontainers")
+    testImplementation project(":eventuate-common-database-testcontainers")
     testImplementation "org.testcontainers:testcontainers:$testContainersVersion"
 
 }

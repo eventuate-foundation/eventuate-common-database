@@ -9,7 +9,7 @@ import java.nio.file.Path;
 public class EventuatePostgresContainer extends AbstractEventuatePostgresContainer<EventuatePostgresContainer> {
 
     public EventuatePostgresContainer() {
-        super(ContainerUtil.findImage("eventuateio/eventuate-postgres", "eventuate.common.version.properties"));
+        super(ContainerUtil.findImage("eventuateio/eventuate-postgres", "eventuate.common.database.version.properties"));
         withConfiguration();
     }
 
