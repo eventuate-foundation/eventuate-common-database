@@ -1,0 +1,42 @@
+package io.eventuate.common.database.micronaut.jdbc.sqldialect;
+
+import io.eventuate.common.database.jdbc.sqldialect.*;
+import io.micronaut.context.annotation.Factory;
+import io.micronaut.context.annotation.Value;
+import jakarta.annotation.Nullable;
+
+import jakarta.inject.Singleton;
+import java.util.Collection;
+
+@Factory
+public class SqlDialectFactory {
+
+  @Singleton
+  public MySqlDialect mySqlDialect() {
+    return new MySqlDialect();
+  }
+
+  @Singleton
+  public PostgresDialect postgreSQLDialect() {
+    return new PostgresDialect();
+  }
+
+  @Singleton
+  public MsSqlDialect msSqlDialect() {
+    return new MsSqlDialect();
+  }
+
+  @Singleton
+  public DefaultEventuateSqlDialect defaultSqlDialect(@Nullable @Value("${eventuate.current.time.in.milliseconds.sql}") String customCurrentTimeInMillisecondsExpression) {
+    if (customCurrentTimeInMillisecondsExpression == null) {
+      customCurrentTimeInMillisecondsExpression = "null";
+    }
+
+    return new DefaultEventuateSqlDialect(customCurrentTimeInMillisecondsExpression);
+  }
+
+  @Singleton
+  public SqlDialectSelector sqlDialectSelector(Collection<EventuateSqlDialect> dialects) {
+    return new SqlDialectSelector(dialects);
+  }
+}
