@@ -1,6 +1,86 @@
-= An Eventuate project
+= Eventuate Common Database
 
 image::https://eventuate.io/i/logo.gif[]
 
 This project is part of http://eventuate.io[Eventuate], which is a microservices collaboration platform.
 
+It contains the database schema that Eventuate Tram, Eventuate Local and the Eventuate CDC service use, the code that accesses it, and the database images and https://testcontainers.com/[Testcontainers] containers.
+
+It publishes these artifacts under the group `io.eventuate.common.database`:
+
+|===
+| Artifact | Package | Contents
+
+| `eventuate-common-jdbc`
+| `io.eventuate.common.database.jdbc`, `io.eventuate.common.database.jdbc.sqldialect`
+| `EventuateCommonJdbcOperations`, which writes to the outbox and event tables, and `EventuateSqlDialect`, which handles the differences between MySQL, Postgres and SQL Server
+
+| `eventuate-common-jdbc-tests`
+| `io.eventuate.common.database.jdbc.tests`
+| Abstract tests for implementations of `EventuateCommonJdbcOperations`
+
+| `eventuate-common-common-spring-jdbc`, `eventuate-common-spring-jdbc`
+| `io.eventuate.common.database.spring.jdbc`, `io.eventuate.common.database.spring.jdbc.sqldialect`
+| The Spring configuration of the JDBC modules
+
+| `eventuate-common-reactive-jdbc`
+| `io.eventuate.common.database.reactive.jdbc`
+| The R2DBC version of `EventuateCommonJdbcOperations`
+
+| `eventuate-common-spring-reactive-jdbc`
+| `io.eventuate.common.database.spring.jdbc.reactive`
+| The Spring configuration of `eventuate-common-reactive-jdbc`
+
+| `eventuate-common-in-memory-database`
+| `io.eventuate.common.database.inmemorydatabase`
+| An embedded H2 database for tests, whose schema scripts a consumer supplies with `EventuateDatabaseScriptSupplier`
+
+| `eventuate-common-common-spring-in-memory-database`, `eventuate-common-spring-in-memory-database`
+| `io.eventuate.common.database.common.spring.inmemorydatabase`, `io.eventuate.common.database.spring.inmemorydatabase`
+| The Spring configuration of the in-memory database
+
+| `eventuate-common-flyway`
+| `io.eventuate.common.database.flyway`
+| The schema as Flyway migrations, and `TemplatedMessageTableCreator`, which creates partitioned outbox tables
+
+| `eventuate-common-database-testcontainers`
+| `io.eventuate.common.database.testcontainers`
+| `DatabaseContainerFactory` and the MySQL, Postgres and SQL Server containers, which run this project's images with the tag of this project's version
+
+| `eventuate-common-database-bom`
+|
+| The BOM for these artifacts
+|===
+
+It also builds these images:
+
+* `eventuateio/eventuate-mysql8` and `eventuateio/eventuate-vanilla-mysql8`, from `mysql/`
+* `eventuateio/eventuate-postgres` and `eventuateio/eventuate-vanilla-postgres`, from `postgres/`
+* `eventuateio/eventuate-mssql`, from `mssql/`
+
+The `eventuate-*` images contain the Eventuate schema and are configured for the CDC. The `eventuate-vanilla-*` images do not contain the schema.
+`migration/db-id` migrates a database to database-generated IDs.
+
+Its version is set in a consumer's `gradle.properties` with the property `eventuateCommonDatabaseVersion`, and the images' tag with `eventuateCommonDatabaseImageVersion`.
+Docker Compose files use `EVENTUATE_COMMON_DATABASE_VERSION` for the tag of the database images.
+
+== Migrating from eventuate-common
+
+These were previously part of https://github.com/eventuate-foundation/eventuate-common[eventuate-common], which published them under the group `io.eventuate.common`:
+
+* The packages were not under `io.eventuate.common.database`. For example, `io.eventuate.common.database.jdbc` was `io.eventuate.common.jdbc`.
+* Each artifact other than `eventuate-common-database-testcontainers` declares the capability of its old coordinates, so a Gradle build that gets both the old and the new artifact fails with a capability conflict.
+* The database containers were in `eventuate-common-testcontainers`, in the package `io.eventuate.common.testcontainers`.
+A consumer that uses them depends on `eventuate-common-database-testcontainers`.
+
+The https://github.com/cer/openrewrite-recipes/blob/master/eventuate-common-split/README.adoc[migration guide] lists the new groups, version properties and packages, and describes the OpenRewrite recipe that migrates a consumer.
+
+== Building
+
+----
+./build-and-test-all-mysql8.sh
+./build-and-test-all-postgres.sh
+./build-and-test-all-mssql.sh
+----
+
+Each script builds and starts the database with Docker Compose, then runs `./gradlew build` and the JDBC tests against it, with application-generated and database-generated IDs, after the `migration/db-id` migration, and with JSON payloads.
