@@ -23,9 +23,17 @@ apply plugin: "io.eventuate.plugins.gradle.publish.EventuatePublish"
 apply plugin: "io.eventuate.plugins.gradle.publish.EventuatePublishDockerImages"
 apply plugin: "io.eventuate.plugins.gradle.publish.PublishMultiArchContainerImages"
 
-allprojects {
-    group = "io.eventuate.common"
+// The root project is not a module, but the publish plugin would publish it as an empty eventuate-common-database jar
+tasks.withType(PublishToMavenRepository).configureEach {
+    enabled = false
 }
+
+allprojects {
+    group = "io.eventuate.common.database"
+}
+
+// Modules that eventuate-common did not publish, so they have no old coordinates
+def newModules = ["eventuate-common-database-testcontainers"]
 
 subprojects {
     java {
@@ -39,12 +47,23 @@ subprojects {
         eventuateMavenRepoUrl.split(',').each { repoUrl -> maven { url repoUrl } }
     }
 
-    if (!project.name.endsWith("-bom"))
+    if (!project.name.endsWith("-bom")) {
         dependencies {
             testImplementation "org.assertj:assertj-core:$assertjVersion"
             testImplementation "org.junit.jupiter:junit-jupiter:$junitVersion"
             testRuntimeOnly "org.junit.platform:junit-platform-launcher:$junitPlatformLauncherVersion"
         }
+
+        // The modules were published as io.eventuate.common:<module> by eventuate-common.
+        // Declaring that capability makes a build that gets both fail with a capability conflict
+        // instead of putting two jars with the same classes on the classpath.
+        if (!(project.name in newModules)) {
+            configurations.matching { it.name in ["apiElements", "runtimeElements"] }.configureEach {
+                outgoing.capability("${project.group}:${project.name}:${project.version}")
+                outgoing.capability("io.eventuate.common:${project.name}:${project.version}")
+            }
+        }
+    }
 }
 
 gradle.projectsEvaluated {
@@ -69,7 +88,7 @@ dockerCompose {
 
     mysql8 {
         projectName = null
-        useComposeFiles = ["docker-compose-mysql8.yml", "docker-compose-zookeeper.yml"]
+        useComposeFiles = ["docker-compose-mysql8.yml"]
         removeContainers = project.ext.removeContainers.toBoolean()
     }
 
@@ -81,19 +100,19 @@ dockerCompose {
 
     mysql8multiarch {
         projectName = null
-        useComposeFiles = ["docker-compose-mysql8-multi-arch.yml", "docker-compose-zookeeper-multi-arch.yml"]
+        useComposeFiles = ["docker-compose-mysql8-multi-arch.yml"]
         removeContainers = project.ext.removeContainers.toBoolean()
     }
 
     postgresmultiarch {
         projectName = null
-        useComposeFiles = ["docker-compose-postgres-multi-arch.yml", "docker-compose-zookeeper-multi-arch.yml"]
+        useComposeFiles = ["docker-compose-postgres-multi-arch.yml"]
         removeContainers = project.ext.removeContainers.toBoolean()
     }
 
     postgres {
         projectName = null
-        useComposeFiles = ["docker-compose-postgres.yml", "docker-compose-zookeeper.yml"]
+        useComposeFiles = ["docker-compose-postgres.yml"]
         removeContainers = project.ext.removeContainers.toBoolean()
     }
 
@@ -105,7 +124,7 @@ dockerCompose {
 
     mssql {
         projectName = null
-        useComposeFiles = ["docker-compose-mssql.yml", "docker-compose-zookeeper.yml"]
+        useComposeFiles = ["docker-compose-mssql.yml"]
         removeContainers = project.ext.removeContainers.toBoolean()
     }
 
@@ -125,7 +144,6 @@ publishMultiArch {
     image "eventuateio/eventuate-mysql8"
     image "eventuateio/eventuate-postgres"
     image "eventuateio/eventuate-vanilla-mysql8"
-    image "eventuateio/eventuate-zookeeper"
     image "eventuateio/eventuate-vanilla-postgres"
 }
 

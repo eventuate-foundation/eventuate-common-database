@@ -18,20 +18,20 @@ orbs:
         machine:
           image: ubuntu-2404:2024.11.1
         resource_class: <<parameters.resource_class>>
-        working_directory: ~/eventuate-common
+        working_directory: ~/eventuate-common-database
         steps:
           - checkout
           - restore_cache:
               keys:
-                - eventuate-common-{{ checksum "gradle.properties" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
-                - eventuate-common-
+                - eventuate-common-database-{{ checksum "gradle.properties" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+                - eventuate-common-database-
           - run:
               command: |
                 ./gradlew testClasses aggregateJavaDocs
           - save_cache:
               paths:
                 - ~/.gradle
-              key: eventuate-common-{{ checksum "gradle.properties" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+              key: eventuate-common-database-{{ checksum "gradle.properties" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
           - run:
               command: |
                 if [ -z "<<parameters.skip_multi_arch_env_vars>>" ] ; then
@@ -57,7 +57,7 @@ orbs:
             type: string
         docker:
           - image: cimg/base:stable
-        working_directory: ~/eventuate-common
+        working_directory: ~/eventuate-common-database
         steps:
           - checkout
           - setup_remote_docker
@@ -90,7 +90,7 @@ orbs:
         machine:
           image: ubuntu-2404:2024.11.1
         resource_class: <<parameters.resource_class>>
-        working_directory: ~/eventuate-common
+        working_directory: ~/eventuate-common-database
         steps:
           - checkout
           - run:
@@ -106,7 +106,7 @@ orbs:
             type: string
         docker:
           - image: cimg/base:stable
-        working_directory: ~/eventuate-common
+        working_directory: ~/eventuate-common-database
         steps:
           - checkout
           - setup_remote_docker
@@ -165,40 +165,6 @@ workflows:
       - build-and-test/build-and-test:
           name: build-and-test-postgres
           script: ./build-and-test-all-postgres.sh
-      - native-image/build:
-          name: build-native-image-zookeeper-intel
-          script: ./build-docker-image-native.sh $ZOOKEEPER_MULTI_ARCH_IMAGE zookeeper/Dockerfile zookeeper
-          resource_class: medium
-          context:
-            - publish
-          requires:
-            - build-and-test-mysql8-intel
-            - build-and-test-mysql8-arm
-            - build-and-test-postgres-intel
-            - build-and-test-postgres-arm
-            - build-and-test-mssql
-            - build-and-test-postgres
-      - native-image/build:
-          name: build-native-image-zookeeper-arm
-          script: ./build-docker-image-native.sh $ZOOKEEPER_MULTI_ARCH_IMAGE zookeeper/Dockerfile zookeeper
-          resource_class: arm.medium
-          context:
-            - publish
-          requires:
-            - build-and-test-mysql8-intel
-            - build-and-test-mysql8-arm
-            - build-and-test-postgres-intel
-            - build-and-test-postgres-arm
-            - build-and-test-mssql
-            - build-and-test-postgres
-      - native-image/merge:
-          name: build-multi-arch-image-zookeeper
-          script: ./merge-docker-image-multi-arch.sh $ZOOKEEPER_MULTI_ARCH_IMAGE
-          context:
-            - publish
-          requires:
-            - build-native-image-zookeeper-intel
-            - build-native-image-zookeeper-arm
       - native-image/build:
           name: build-native-image-mysql8-intel
           script: ./build-docker-image-native.sh $MYSQL8_MULTI_ARCH_IMAGE mysql/Dockerfile-mysql8 mysql
@@ -270,33 +236,29 @@ workflows:
             - build-and-test-mssql
             - build-and-test-postgres
       - build-and-test/build-and-test:
-          name: test-mysql8-zookeeper-multi-arch-intel
+          name: test-mysql8-multi-arch-intel
           script: ./build-and-test-all-mysql8-multi-arch.sh
           requires:
-            - build-multi-arch-image-zookeeper
             - build-multi-arch-image-mysql8
             - build-multi-arch-image-vanilla-mysql8
       - build-and-test/build-and-test:
-          name: test-mysql8-zookeeper-multi-arch-arm
+          name: test-mysql8-multi-arch-arm
           script: ./build-and-test-all-mysql8-multi-arch.sh
           resource_class: arm.medium
           requires:
-            - build-multi-arch-image-zookeeper
             - build-multi-arch-image-mysql8
             - build-multi-arch-image-vanilla-mysql8
       - build-and-test/build-and-test:
-          name: test-postgres-zookeeper-multi-arch-intel
+          name: test-postgres-multi-arch-intel
           script: ./build-and-test-all-postgres-multi-arch.sh
           requires:
-            - build-multi-arch-image-zookeeper
             - build-multi-arch-image-postgres
             - build-multi-arch-image-vanilla-postgres
       - build-and-test/build-and-test:
-          name: test-postgres-zookeeper-multi-arch-arm
+          name: test-postgres-multi-arch-arm
           script: ./build-and-test-all-postgres-multi-arch.sh
           resource_class: arm.medium
           requires:
-            - build-multi-arch-image-zookeeper
             - build-multi-arch-image-postgres
             - build-multi-arch-image-vanilla-postgres
       - build-and-test/build-and-test:
@@ -304,28 +266,28 @@ workflows:
           context:
             - publish
           requires:
-            - test-mysql8-zookeeper-multi-arch-intel
-            - test-mysql8-zookeeper-multi-arch-arm
-            - test-postgres-zookeeper-multi-arch-intel
-            - test-postgres-zookeeper-multi-arch-arm
+            - test-mysql8-multi-arch-intel
+            - test-mysql8-multi-arch-arm
+            - test-postgres-multi-arch-intel
+            - test-postgres-multi-arch-arm
           script: ./deploy-artifacts.sh
       - build-and-test/build-and-test:
           name: deploy-docker-images
           context:
             - publish
           requires:
-            - test-mysql8-zookeeper-multi-arch-intel
-            - test-mysql8-zookeeper-multi-arch-arm
-            - test-postgres-zookeeper-multi-arch-intel
-            - test-postgres-zookeeper-multi-arch-arm
+            - test-mysql8-multi-arch-intel
+            - test-mysql8-multi-arch-arm
+            - test-postgres-multi-arch-intel
+            - test-postgres-multi-arch-arm
           script: ./deploy-docker-images.sh
       - build-and-test/build-and-test:
           name: deploy-multi-arch
           context:
             - publish
           requires:
-            - test-mysql8-zookeeper-multi-arch-intel
-            - test-mysql8-zookeeper-multi-arch-arm
-            - test-postgres-zookeeper-multi-arch-intel
-            - test-postgres-zookeeper-multi-arch-arm
+            - test-mysql8-multi-arch-intel
+            - test-mysql8-multi-arch-arm
+            - test-postgres-multi-arch-intel
+            - test-postgres-multi-arch-arm
           script: ./deploy-multi-arch.sh

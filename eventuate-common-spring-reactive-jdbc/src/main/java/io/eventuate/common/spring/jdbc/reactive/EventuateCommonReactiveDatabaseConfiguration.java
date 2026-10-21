@@ -4,7 +4,7 @@ import io.eventuate.common.jdbc.EventuateJdbcOperationsUtils;
 import io.eventuate.common.jdbc.sqldialect.EventuateSqlDialect;
 import io.eventuate.common.jdbc.sqldialect.SqlDialectSelector;
 import io.eventuate.common.reactive.jdbc.EventuateCommonReactiveJdbcOperations;
-import io.eventuate.common.spring.id.IdGeneratorConfiguration;
+import io.eventuate.common.id.spring.IdGeneratorConfiguration;
 import io.eventuate.common.spring.jdbc.EventuateSchemaConfiguration;
 import io.eventuate.common.spring.jdbc.sqldialect.SqlDialectConfiguration;
 import io.r2dbc.spi.ConnectionFactory;

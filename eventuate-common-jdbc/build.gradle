@@ -1,6 +1,6 @@
 
 dependencies {
-    api project (":eventuate-common-json-mapper")
+    api "io.eventuate.common.json:eventuate-common-json-mapper:$eventuateCommonJsonVersion"
 
     api "com.mysql:mysql-connector-j:$mysqlConnectorVersion"
     api ("org.postgresql:postgresql:$postgresqlVersion") {

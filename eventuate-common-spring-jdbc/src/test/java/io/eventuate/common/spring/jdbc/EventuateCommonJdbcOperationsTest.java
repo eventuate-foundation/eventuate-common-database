@@ -5,7 +5,7 @@ import io.eventuate.common.jdbc.*;
 import io.eventuate.common.jdbc.sqldialect.EventuateSqlDialect;
 import io.eventuate.common.jdbc.sqldialect.SqlDialectSelector;
 import io.eventuate.common.jdbc.tests.AbstractEventuateCommonJdbcOperationsTest;
-import io.eventuate.common.spring.id.IdGeneratorConfiguration;
+import io.eventuate.common.id.spring.IdGeneratorConfiguration;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

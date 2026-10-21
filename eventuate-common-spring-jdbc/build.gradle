@@ -2,7 +2,7 @@
 dependencies {
     api project (":eventuate-common-common-spring-jdbc")
 
-    testImplementation project (":eventuate-common-spring-id")
+    testImplementation "io.eventuate.common.id:eventuate-common-spring-id:$eventuateCommonIdVersion"
     testImplementation project (":eventuate-common-jdbc-tests")
 
     api "org.springframework.boot:spring-boot-starter:$springBootVersion"

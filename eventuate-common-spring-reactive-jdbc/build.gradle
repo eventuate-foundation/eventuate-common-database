@@ -2,7 +2,7 @@
 dependencies {
     api project (":eventuate-common-reactive-jdbc")
     api project (":eventuate-common-common-spring-jdbc")
-    api project (":eventuate-common-spring-id")
+    api "io.eventuate.common.id:eventuate-common-spring-id:$eventuateCommonIdVersion"
 
     api "org.springframework.boot:spring-boot-starter-data-r2dbc:$springBootVersion"
 
